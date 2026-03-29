@@ -15,9 +15,9 @@ from openai import OpenAI
 
 app = Flask(__name__)
 
-LINE_TOKEN = os.environ["LINE_TOKEN"]
-LINE_SECRET = os.environ["LINE_SECRET"]
-OPENAI_KEY = os.environ["OPENAI_KEY"]
+LINE_TOKEN = os.getenv("LINE_TOKEN")
+LINE_SECRET = os.getenv("LINE_SECRET")
+OPENAI_KEY = os.getenv("OPENAI_KEY")
 
 configuration = Configuration(access_token=LINE_TOKEN)
 handler = WebhookHandler(LINE_SECRET)
