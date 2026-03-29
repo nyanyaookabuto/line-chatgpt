@@ -11,7 +11,8 @@ from linebot.v3.messaging import (
 from linebot.v3.webhook import WebhookHandler
 from linebot.v3.webhooks import MessageEvent, TextMessageContent
 
-from openrouter import OpenRouter
+# Gemini 用
+from openai import OpenAI
 
 app = Flask(__name__)
 
@@ -19,22 +20,25 @@ app = Flask(__name__)
 LINE_TOKEN = os.getenv("LINE_TOKEN")
 LINE_SECRET = os.getenv("LINE_SECRET")
 
-# OpenRouter環境変数
-OPENROUTER_KEY = os.getenv("OPENROUTER_KEY")
+# Gemini環境変数
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # 安全チェック
 if not LINE_TOKEN:
     raise ValueError("LINE_TOKEN が設定されていません")
 if not LINE_SECRET:
     raise ValueError("LINE_SECRET が設定されていません")
-if not OPENROUTER_KEY:
-    raise ValueError("OPENROUTER_KEY が設定されていません")
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY が設定されていません")
 
 configuration = Configuration(access_token=LINE_TOKEN)
 handler = WebhookHandler(LINE_SECRET)
 
-# OpenRouter クライアント
-client = OpenRouter(api_key=OPENROUTER_KEY)
+# Gemini クライアント
+client = OpenAI(
+    api_key=GEMINI_API_KEY,
+    base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+)
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -47,16 +51,16 @@ def callback():
 def handle_message(event):
     user_text = event.message.text
 
-    # OpenRouterで応答生成
-    response = client.chat(
-        model="gpt-4o-mini",  # 無料枠で使えるモデル
+    # Gemini APIで応答生成
+    response = client.chat.completions.create(
+        model="gemini-2.5-flash",
         messages=[
-            {"role": "system", "content": "あなたはユーザー専用の優しいAIです"},
+            {"role": "system", "content": "あなたはユーザー専用の優しいAIです。"},
             {"role": "user", "content": user_text}
         ]
     )
 
-    reply = response['choices'][0]['message']['content']
+    reply = response.choices[0].message.content
 
     # LINEに返信
     with ApiClient(configuration) as api_client:
@@ -69,5 +73,5 @@ def handle_message(event):
         )
 
 if __name__ == "__main__":
-    # Render用にホスト指定
+    # Render用ホスト指定
     app.run(host="0.0.0.0", port=10000)
