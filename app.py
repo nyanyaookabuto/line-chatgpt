@@ -36,7 +36,7 @@ def handle_message(event):
     user_text = event.message.text
 
     response = client.chat.completions.create(
-        model="gpt-5",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "あなたはユーザー専用AI"},
             {"role": "user", "content": user_text}
