@@ -35,15 +35,15 @@ def callback():
 def handle_message(event):
     user_text = event.message.text
 
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model="gpt-4o-mini",
-        messages=[
+        input=[
             {"role": "system", "content": "あなたはユーザー専用AI"},
             {"role": "user", "content": user_text}
         ]
     )
 
-    reply = response.choices[0].message.content
+    reply = response.output_text
 
     with ApiClient(configuration) as api_client:
         line_bot = MessagingApi(api_client)
